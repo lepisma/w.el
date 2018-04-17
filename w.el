@@ -38,13 +38,15 @@
   "First port to check for"
   :group 'w)
 
-(defcustom w-launcher (cons "live-server"
-                            (lambda (dir port)
-                              (let ((default-directory dir)
-                                    (port-arg (format "--port=%s" port)))
-                                (start-process "live-server" nil "live-server" port-arg "--no-browser"))))
-  "Launcher function and identifier"
+(defcustom w-launchers '(("live-server" . w-launcher-default))
+  "Launcher functions and identifiers"
   :group 'w)
+
+(defun w-launcher-default (dir port)
+  "Default launcher using live-server"
+  (let ((default-directory dir)
+        (port-arg (format "--port=%s" port)))
+    (start-process "live-server" nil "live-server" port-arg "--no-browser")))
 
 (defvar w-instances '()
   "List of instances currently active")
@@ -67,6 +69,8 @@
         :documentation "Directory for the process")
    (port :initarg :port
          :documentation "Port the server is running on")
+   (launcher :initarg :launcher
+             :documentation "Identifier for the launcher")
    (process :initarg :process
             :initform nil
             :documentation "Holder for the running process"))
@@ -86,11 +90,21 @@
 
 (cl-defmethod w-pp ((wi w))
   "Pretty print process"
-  (format "[%s] %s: %s" (oref wi port) (car w-launcher) (abbreviate-file-name (oref wi dir))))
+  (format "[%s] %s: %s" (oref wi port) (oref wi launcher) (abbreviate-file-name (oref wi dir))))
 
 (defun w-dir-live-p (dir)
   "Tell which instance is serving DIR"
   (find dir w-instances :key (lambda (wi) (oref wi :dir))))
+
+(defun w-create (dir launcher)
+  (let* ((port (w-get-free-port))
+         (process (funcall (cdr launcher) dir port))
+         (wi (w :dir dir
+                :port port
+                :launcher (car launcher)
+                :process process)))
+    (setq w-instances (cons wi w-instances))
+    (w-browse wi)))
 
 ;;;###autoload
 (defun w-start (&optional dir)
@@ -100,12 +114,15 @@
          (wi (w-dir-live-p dir)))
     (if wi (w-browse wi)
       (let* ((port (w-get-free-port))
-             (process (funcall (cdr w-launcher) dir port))
-             (wi (w :dir dir :port port :process process)))
-        (setq w-instances (cons wi w-instances))
-        (w-browse wi)))))
+             (n-launchers (length w-launchers)))
+        (cond ((= n-launchers 0) (signal 'error "No launcher found"))
+              ((= n-launchers 1) (w-create dir (car w-launchers)))
+              (t (helm :sources (helm-build-sync-source "Available launchers"
+                                  :candidates (mapcar (lambda (l) (cons (car l) l)) w-launchers)
+                                  :action (lambda (l) (w-create dir l)))
+                       :buffer "*helm w launchers*")))))))
 
-(defun w-browser ()
+(defun w-open-browser ()
   "Start browser for a w instance"
   (interactive)
   (let ((n-instances (length w-instances)))
