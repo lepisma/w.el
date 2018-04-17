@@ -92,6 +92,7 @@
   "Tell which instance is serving DIR"
   (find dir w-instances :key (lambda (wi) (oref wi :dir))))
 
+;;;###autoload
 (defun w-start (&optional dir)
   "Start a new w instance in DIR"
   (interactive)
