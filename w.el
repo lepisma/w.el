@@ -104,7 +104,8 @@
                 :launcher (car launcher)
                 :process process)))
     (setq w-instances (cons wi w-instances))
-    (w-browse wi)))
+    (w-browse wi)
+    wi))
 
 ;;;###autoload
 (defun w-start (&optional dir)
