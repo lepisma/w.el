@@ -108,11 +108,15 @@
     wi))
 
 ;;;###autoload
+(defun w-start-here ()
+  (interactive)
+  (w-start default-directory))
+
+;;;###autoload
 (defun w-start (&optional dir)
   "Start a new w instance in DIR"
-  (interactive)
-  (let* ((dir (or dir default-directory))
-         (wi (w-dir-live-p dir)))
+  (interactive "DRoot directory: ")
+  (let ((wi (w-dir-live-p dir)))
     (if wi (w-browse wi)
       (let* ((port (w-get-free-port))
              (n-launchers (length w-launchers)))
