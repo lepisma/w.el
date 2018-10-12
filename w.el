@@ -84,9 +84,9 @@
           (kill-process process)
           (setq w-instances (delete wi w-instances))))))
 
-(cl-defmethod w-browse ((wi w))
-  "Run browser for the process"
-  (browse-url (format "http://localhost:%s" (oref wi port))))
+(cl-defmethod w-browse ((wi w) &optional rel-path)
+  "Run browser for the process. REL-PATH starts with a `/' char."
+  (browse-url (format "http://localhost:%s%s" (oref wi port) (or rel-path ""))))
 
 (cl-defmethod w-pp ((wi w))
   "Pretty print process"
@@ -104,38 +104,37 @@
                 :launcher (car launcher)
                 :process process)))
     (setq w-instances (cons wi w-instances))
-    (w-browse wi)
     wi))
 
 ;;;###autoload
-(defun w-start-here ()
+(defun w-start-here (&optional rel-path)
   (interactive)
-  (w-start default-directory))
+  (w-start default-directory rel-path))
 
 ;;;###autoload
-(defun w-start (&optional dir)
+(defun w-start (&optional dir rel-path)
   "Start a new w instance in DIR"
   (interactive "DRoot directory: ")
   (let ((wi (w-dir-live-p dir)))
-    (if wi (w-browse wi)
+    (if wi (w-browse wi rel-path)
       (let* ((port (w-get-free-port))
              (n-launchers (length w-launchers)))
         (cond ((= n-launchers 0) (signal 'error "No launcher found"))
               ((= n-launchers 1) (w-create dir (car w-launchers)))
               (t (helm :sources (helm-build-sync-source "Available launchers"
                                   :candidates (mapcar (lambda (l) (cons (car l) l)) w-launchers)
-                                  :action (lambda (l) (w-create dir l)))
+                                  :action (lambda (l) (w-browse (w-create dir l) rel-path)))
                        :buffer "*helm w launchers*")))))))
 
-(defun w-open-browser ()
+(defun w-open-browser (&optional rel-path)
   "Start browser for a w instance"
   (interactive)
   (let ((n-instances (length w-instances)))
     (cond ((= n-instances 0) (message "No w instances running"))
-          ((= n-instances 1) (w-browse (car w-instances)))
+          ((= n-instances 1) (w-browse (car w-instances) rel-path))
           (t (helm :sources (helm-build-sync-source "Running w instances"
                               :candidates (mapcar (lambda (wi) (cons (w-pp wi) wi)) w-instances)
-                              :action 'w-browse)
+                              :action (lambda (wi) (w-browse wi rel-path)))
                    :buffer "*helm w browse*")))))
 
 (defun w-stop ()
