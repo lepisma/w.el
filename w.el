@@ -117,10 +117,9 @@
   (interactive "DRoot directory: ")
   (let ((wi (w-dir-live-p dir)))
     (if wi (w-browse wi rel-path)
-      (let* ((port (w-get-free-port))
-             (n-launchers (length w-launchers)))
+      (let* ((n-launchers (length w-launchers)))
         (cond ((= n-launchers 0) (signal 'error "No launcher found"))
-              ((= n-launchers 1) (w-create dir (car w-launchers)))
+              ((= n-launchers 1) (w-browse (w-create dir (car w-launchers)) rel-path))
               (t (helm :sources (helm-build-sync-source "Available launchers"
                                   :candidates (mapcar (lambda (l) (cons (car l) l)) w-launchers)
                                   :action (lambda (l) (w-browse (w-create dir l) rel-path)))
