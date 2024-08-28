@@ -3,7 +3,7 @@
 ;; Copyright (c) 2018-2024 Abhinav Tushar
 
 ;; Author: Abhinav Tushar <lepisma@fastmail.com>
-;; Version: 0.0.6
+;; Version: 0.0.8
 ;; Package-Requires: ((emacs "25"))
 ;; URL: https://github.com/lepisma/w.el
 
