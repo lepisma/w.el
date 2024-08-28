@@ -1,10 +1,10 @@
 ;;; w.el --- Simple server process launcher -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2018 Abhinav Tushar
+;; Copyright (c) 2018-2024 Abhinav Tushar
 
 ;; Author: Abhinav Tushar <lepisma@fastmail.com>
 ;; Version: 0.0.6
-;; Package-Requires: ((emacs "25") (helm "2.9.2"))
+;; Package-Requires: ((emacs "25"))
 ;; URL: https://github.com/lepisma/w.el
 
 ;;; Commentary:
@@ -28,8 +28,6 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-
-(require 'helm)
 
 (defgroup w nil
   "w server launcher")
@@ -106,6 +104,10 @@
     (setq w-instances (cons wi w-instances))
     wi))
 
+(defun w--complete-and-act (prompt collection action-fn)
+  (let ((completion-match (completing-read prompt collection)))
+    (funcall action-fn (alist-get completion-match collection nil nil #'string-equal))))
+
 ;;;###autoload
 (defun w-start-here (&optional rel-path)
   (interactive)
@@ -120,10 +122,9 @@
       (let* ((n-launchers (length w-launchers)))
         (cond ((= n-launchers 0) (signal 'error "No launcher found"))
               ((= n-launchers 1) (w-browse (w-create dir (car w-launchers)) rel-path))
-              (t (helm :sources (helm-build-sync-source "Available launchers"
-                                  :candidates (mapcar (lambda (l) (cons (car l) l)) w-launchers)
-                                  :action (lambda (l) (w-browse (w-create dir l) rel-path)))
-                       :buffer "*helm w launchers*")))))))
+              (t (w--complete-and-act "Available launchers: "
+                                      (mapcar (lambda (l) (cons (car l) l)) w-launchers)
+                                      (lambda (l) (w-browse (w-create dir l) rel-path)))))))))
 
 (defun w-open-browser (&optional rel-path)
   "Start browser for a w instance"
@@ -131,10 +132,9 @@
   (let ((n-instances (length w-instances)))
     (cond ((= n-instances 0) (message "No w instances running"))
           ((= n-instances 1) (w-browse (car w-instances) rel-path))
-          (t (helm :sources (helm-build-sync-source "Running w instances"
-                              :candidates (mapcar (lambda (wi) (cons (w-pp wi) wi)) w-instances)
-                              :action (lambda (wi) (w-browse wi rel-path)))
-                   :buffer "*helm w browse*")))))
+          (t (w--complete-and-act "Running w instances"
+                                  (mapcar (lambda (wi) (cons (w-pp wi) wi)) w-instances)
+                                  (lambda (wi) (w-browse wi rel-path)))))))
 
 (defun w-stop ()
   "Stop a w instance"
@@ -142,10 +142,9 @@
   (let ((n-instances (length w-instances)))
     (cond ((= n-instances 0) (message "No w instances running"))
           ((= n-instances 1) (w-kill (car w-instances)))
-          (t (helm :sources (helm-build-sync-source "Running w instances"
-                              :candidates (mapcar (lambda (wi) (cons (w-pp wi) wi)) w-instances)
-                              :action 'w-kill)
-                   :buffer "*helm w stop*")))))
+          (t (w--complete-and-act "Running w instances"
+                                  (mapcar (lambda (wi) (cons (w-pp wi) wi)) w-instances)
+                                  'w-kill)))))
 
 (provide 'w)
 

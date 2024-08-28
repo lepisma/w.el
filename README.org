@@ -1,3 +1,8 @@
 #+TITLE: w.el
 
-Simple (local) server process manager.
+Simple static live serving system for Emacs. As of now, this depends on
+[[https://www.npmjs.com/package/live-server][live-server]] to work which you would need to install before using.
+
+Once installed, you can call ~w-start-here~ or ~w-start~ to run the live
+server. You can also customize the port ~w-start-port~ which is set to a default
+of 8080 right now.
