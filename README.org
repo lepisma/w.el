@@ -1,6 +1,6 @@
 #+TITLE: w.el
 
-Simple static live serving system for Emacs. As of now, this depends on
+Simple live serving system for static files. As of now, this depends on
 [[https://www.npmjs.com/package/live-server][live-server]] to work which you would need to install before using.
 
 Once installed, you can call ~w-start-here~ or ~w-start~ to run the live

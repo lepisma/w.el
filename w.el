@@ -1,15 +1,15 @@
-;;; w.el --- Simple server process launcher -*- lexical-binding: t; -*-
+;;; w.el --- Simple live serving system for static files -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2018-2024 Abhinav Tushar
 
 ;; Author: Abhinav Tushar <lepisma@fastmail.com>
-;; Version: 0.0.8
+;; Version: 0.0.9
 ;; Package-Requires: ((emacs "25"))
 ;; URL: https://github.com/lepisma/w.el
 
 ;;; Commentary:
 
-;; Simple server process launcher
+;; Simple live serving system for static files
 ;; This file is not a part of GNU Emacs.
 
 ;;; License:
@@ -28,6 +28,8 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
+
+(require 'cl-seq)
 
 (defgroup w nil
   "w server launcher")
@@ -92,7 +94,7 @@
 
 (defun w-dir-live-p (dir)
   "Tell which instance is serving DIR"
-  (find dir w-instances :key (lambda (wi) (oref wi :dir))))
+  (cl-find dir w-instances :key (lambda (wi) (oref wi :dir))))
 
 (defun w-create (dir launcher)
   (let* ((port (w-get-free-port))
