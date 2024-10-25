@@ -30,12 +30,14 @@
 ;;; Code:
 
 (require 'cl-seq)
+(require 'eieio)
 
 (defgroup w nil
   "w server launcher")
 
 (defcustom w-start-port 8080
   "First port to check for"
+  :type 'natnum
   :group 'w)
 
 (defcustom w-launchers '(("live-server" . w-launcher-default))
