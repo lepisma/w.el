@@ -46,9 +46,8 @@
 
 (defun w-launcher-default (dir port)
   "Default launcher using live-server"
-  (let ((default-directory dir)
-        (port-arg (format "--port=%s" port)))
-    (start-process "live-server" nil "live-server" port-arg "--no-browser")))
+  (let ((default-directory (expand-file-name dir)))
+    (start-process "live-server" nil "live-server" "--host=127.0.0.1" (format "--port=%s" port) "--index")))
 
 (defvar w-instances '()
   "List of instances currently active")
