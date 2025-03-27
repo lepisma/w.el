@@ -1,7 +1,14 @@
 #+TITLE: w.el
 
 Simple live serving system for static files. As of now, this depends on
-[[https://www.npmjs.com/package/live-server][live-server]] to work which you would need to install before using.
+[[https://crates.io/crates/live-server][live-server]] to work. If you are using ~use-package~, just do the following:
+
+#+begin_src emacs-lisp
+(use-package w
+  :vc (:url "https://github.com/lepisma/w.el.git")
+  :demand t
+  :ensure-system-package (live-server . "cargo install live-server"))
+#+end_src
 
 Once installed, you can call ~w-start-here~ or ~w-start~ to run the live
 server. You can also customize the port ~w-start-port~ which is set to a default
