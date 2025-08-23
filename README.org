@@ -1,3 +1,7 @@
+#+begin_quote
+Development for this project has moved to sourcehut [[https://git.sr.ht/~lepisma/w.el][here]]. This repository is now in a read-only state.
+#+end_quote
+
 #+TITLE: w.el
 
 Simple live serving system for static files. As of now, this depends on
